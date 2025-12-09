@@ -18,48 +18,20 @@ import {
   useLocalStorageString,
   useLocalStorageJSON,
 } from "@/hooks/useLocalStorage";
-
-// ASCII characters list for reuse
-const ASCII_CHARS = [
-  "█",
-  "▓",
-  "▒",
-  "░",
-  "▄",
-  "▀",
-  "▌",
-  "▐",
-  "■",
-  "□",
-  "▪",
-  "▫",
-  "●",
-  "○",
-  "#",
-  "*",
-  "|",
-  "+",
-  "-",
-  "=",
-  ".",
-  ":",
-  ";",
-  "~",
-  "^",
-  "&",
-  "@",
-  "%",
-  "$",
-];
+import { GraphType, GraphDataPoint } from "@/types/graph";
+import { ASCII_CHARS } from "@/constants/ascii";
 
 export default function Home() {
-  const [csvData, setCsvData] = useState<string>("");
-  const [graphType, setGraphType] = useState<
-    "bar" | "verticalBar" | "area" | "pie"
-  >("bar");
-  const [parsedData, setParsedData] = useState<
-    Array<{ label: string; value: number }>
-  >([]);
+  const [csvData, setCsvData] = useState<string>(`Role,	Analogy
+External,	14
+Internal,	23
+Cop, 17
+Elevato, 9
+Boom, 4
+Blast, 20
+Carps, 7`);
+  const [graphType, setGraphType] = useState<GraphType>("bar");
+  const [parsedData, setParsedData] = useState<GraphDataPoint[]>([]);
 
   // Use React 19 best practices with useSyncExternalStore for localStorage
   const [backgroundColor, setBackgroundColor] = useLocalStorageString(
@@ -100,7 +72,7 @@ export default function Home() {
     "▫",
   ]);
 
-  const handleCSVProcess = (data: Array<{ label: string; value: number }>) => {
+  const handleCSVProcess = (data: GraphDataPoint[]) => {
     setParsedData(data);
   };
 
@@ -441,8 +413,8 @@ export default function Home() {
                 </Button>
                 <Button
                   onClick={() => {
-                    setBackgroundColor("white");
-                    setTextColor("black");
+                    setBackgroundColor("#ffffff");
+                    setTextColor("#000000");
                   }}
                   variant="outline"
                   size="sm"

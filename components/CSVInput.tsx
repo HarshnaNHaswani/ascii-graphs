@@ -1,12 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-interface CSVInputProps {
-  onDataProcessed: (data: Array<{ label: string; value: number }>) => void;
-  csvData: string;
-  setCsvData: (data: string) => void;
-}
+import { CSVInputProps } from "@/types/csv";
+import { parseCSV } from "@/lib/csv/parser";
 
 export default function CSVInput({
   onDataProcessed,
@@ -14,38 +10,6 @@ export default function CSVInput({
   setCsvData,
 }: CSVInputProps) {
   const [error, setError] = useState<string>("");
-
-  const parseCSV = (text: string): Array<{ label: string; value: number }> => {
-    const lines = text.trim().split("\n");
-    if (lines.length === 0) return [];
-
-    // Try to detect if first line is header
-    const startIndex =
-      lines[0].includes(",") && isNaN(parseFloat(lines[0].split(",")[1]))
-        ? 1
-        : 0;
-
-    const data: Array<{ label: string; value: number }> = [];
-
-    for (let i = startIndex; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      const parts = line.split(",").map((p) => p.trim());
-      if (parts.length < 2) continue;
-
-      const label = parts[0];
-      const value = parseFloat(parts[1]);
-
-      if (isNaN(value)) {
-        throw new Error(`Invalid number in row ${i + 1}: ${parts[1]}`);
-      }
-
-      data.push({ label, value });
-    }
-
-    return data;
-  };
 
   const handleProcess = () => {
     try {
