@@ -18,6 +18,16 @@ const replaceSpaces = (str: string): string => {
   return str.replace(/ /g, NBSP);
 };
 
+// Helper function to escape HTML entities
+const escapeHtml = (text: string): string => {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
 export default function GraphDisplay({
   data,
   graphType,
@@ -38,88 +48,44 @@ export default function GraphDisplay({
     let output = "";
     switch (graphType) {
       case "bar":
-        output = generateBarGraph(data, barChar);
+        output = generateBarGraph(data, barChar, backgroundColor, textColor);
         break;
       case "verticalBar":
-        output = generateVerticalBarChart(data, barChar);
+        output = generateVerticalBarChart(
+          data,
+          barChar,
+          backgroundColor,
+          textColor
+        );
         break;
       case "area":
-        output = generateAreaChart(data, areaChars);
+        output = generateAreaChart(data, areaChars, backgroundColor, textColor);
         break;
       case "pie":
-        output = generatePieChart(data, pieChars);
+        output = generatePieChart(data, pieChars, backgroundColor, textColor);
         break;
       default:
         output = "";
     }
-    // Replace all regular spaces with non-breaking spaces
-    return replaceSpaces(output);
-  }, [data, graphType, barChar, areaChars, pieChars]);
-
-  // Extract just the graph portion (without title, separator, and values list)
-  const extractGraphOnly = (output: string): string => {
-    const lines = output.split("\n");
-    // Find the separator line (usually "=" line)
-    let separatorIndex = -1;
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].trim().startsWith("=") && lines[i].length > 10) {
-        separatorIndex = i;
-        break;
-      }
-    }
-
-    if (separatorIndex === -1) {
-      // No separator found, return as-is
-      return output;
-    }
-
-    // Start after separator, skip empty lines
-    let graphStartIndex = separatorIndex + 1;
-    while (
-      graphStartIndex < lines.length &&
-      lines[graphStartIndex].trim() === ""
-    ) {
-      graphStartIndex++;
-    }
-
-    // Find where values list starts (lines like "Label: Value")
-    let valuesStartIndex = lines.length;
-    for (let i = graphStartIndex; i < lines.length; i++) {
-      // Check if this looks like a values line (contains ": " followed by digits)
-      if (lines[i].trim().match(/^[^:]+:\s*\d+/)) {
-        valuesStartIndex = i;
-        break;
-      }
-    }
-
-    // Extract graph portion (from graph start to values start, excluding empty lines at end)
-    const graphLines = lines.slice(graphStartIndex, valuesStartIndex);
-
-    // Remove trailing empty lines
-    while (
-      graphLines.length > 0 &&
-      graphLines[graphLines.length - 1].trim() === ""
-    ) {
-      graphLines.pop();
-    }
-
-    return graphLines.join("\n");
-  };
+    return output;
+  }, [
+    data,
+    graphType,
+    barChar,
+    areaChars,
+    pieChars,
+    backgroundColor,
+    textColor,
+  ]);
 
   const copyToClipboard = async (content: string) => {
-    // Escape HTML entities for safe HTML copying
-    const escapeHtml = (text: string) => {
-      return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    };
+    // Content is already HTML, so we can use it directly
+    const htmlContent = content;
 
-    // Create HTML version with preserved formatting
-    const htmlContent = `<pre style="font-family: monospace; background-color: ${backgroundColor}; color: ${textColor}; white-space: pre; word-break: keep-all; margin: 0; padding: 0; line-height: 1.2;">${escapeHtml(content)}</pre>`;
-    const textContent = content;
+    // Extract plain text version for fallback
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = content;
+    const textContent = tempDiv.textContent || tempDiv.innerText || "";
 
     // Try to copy as HTML with fallback to plain text
     if (navigator.clipboard && navigator.clipboard.write) {
@@ -157,26 +123,6 @@ export default function GraphDisplay({
     }
   };
 
-  const handleCopyGraphOnly = async () => {
-    try {
-      const graphOnly = extractGraphOnly(graphOutput);
-      await copyToClipboard(graphOnly);
-      setCopiedGraphOnly(true);
-      setTimeout(() => setCopiedGraphOnly(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy graph only:", err);
-      // Final fallback
-      try {
-        const graphOnly = extractGraphOnly(graphOutput);
-        await navigator.clipboard.writeText(graphOnly);
-        setCopiedGraphOnly(true);
-        setTimeout(() => setCopiedGraphOnly(false), 2000);
-      } catch (fallbackErr) {
-        console.error("Fallback copy also failed:", fallbackErr);
-      }
-    }
-  };
-
   if (data.length === 0) {
     return (
       <div>
@@ -195,16 +141,6 @@ export default function GraphDisplay({
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold text-slate-900">Graph Display</h2>
         <div className="flex gap-2">
-          <button
-            onClick={handleCopyGraphOnly}
-            className={`px-4 py-2 rounded-md font-medium transition-colors text-sm ${
-              copiedGraphOnly
-                ? "bg-green-600 text-white"
-                : "bg-slate-200 text-slate-700 hover:bg-slate-300"
-            }`}
-          >
-            {copiedGraphOnly ? "✓ Copied!" : "Copy Graph Only"}
-          </button>
           <button
             onClick={handleCopy}
             className={`px-4 py-2 rounded-md font-medium transition-colors ${
@@ -225,12 +161,10 @@ export default function GraphDisplay({
           color: textColor,
         }}
       >
-        <pre
-          className="font-mono text-sm whitespace-pre"
-          style={{ whiteSpace: "pre", wordBreak: "keep-all" }}
-        >
-          {graphOutput}
-        </pre>
+        <div
+          className="font-mono text-sm"
+          dangerouslySetInnerHTML={{ __html: graphOutput }}
+        />
       </div>
     </div>
   );
@@ -238,22 +172,20 @@ export default function GraphDisplay({
 
 function generateBarGraph(
   data: Array<{ label: string; value: number }>,
-  barChar: string = "█"
+  barChar: string = "█",
+  backgroundColor: string = "#1e293b",
+  textColor: string = "#4ade80"
 ): string {
   if (!barChar) {
-    return "Error: Bar character is required.";
+    return "<div class='graph-wrapper'><p>Error: Bar character is required.</p></div>";
   }
   const maxValue = Math.max(...data.map((d) => d.value));
   const maxLabelLength = Math.max(...data.map((d) => d.label.length), 20);
   const barWidth = 50;
   const scale = barWidth / maxValue;
 
-  let output = "";
-
-  // Title
-  output += "Bar Graph\n";
-  const titleWidth = Math.max(barWidth + maxLabelLength + 15, 60);
-  output += "=".repeat(titleWidth) + "\n\n";
+  let graphContent = "";
+  let legendContent = "";
 
   // Bars
   data.forEach(({ label, value }) => {
@@ -261,25 +193,38 @@ function generateBarGraph(
     const bar = barChar.repeat(barLength);
     const padding = " ".repeat(maxLabelLength - label.length);
     const valueStr = value.toString();
-    output += `${label}${padding} │${bar} ${valueStr}\n`;
+    const rowContent = `${escapeHtml(label)}${padding} │${escapeHtml(bar)} ${valueStr}`;
+    graphContent += `<div class="graph-row">${rowContent}</div>`;
+    legendContent += `<div class="legend-item"><span class="legend-label">${escapeHtml(label)}</span>: <span class="legend-value">${valueStr}</span></div>`;
   });
 
   // Add scale indicator
-  output += "\n";
-  output += " ".repeat(maxLabelLength + 2);
-  output += "0";
-  output += " ".repeat(barWidth - 1);
-  output += `${maxValue}\n`;
+  const scaleContent = `${" ".repeat(maxLabelLength + 2)}0${" ".repeat(barWidth - 1)}${maxValue}`;
+  graphContent += `<div class="graph-scale">${scaleContent}</div>`;
 
-  return output;
+  return `
+    <div class="graph-wrapper" style="background-color: ${backgroundColor}; color: ${textColor};">
+      <h1 class="graph-heading">Bar Graph</h1>
+      <section class="legend-section">
+        <h2 class="legend-heading">Legend</h2>
+        <div class="legend-content">${legendContent}</div>
+      </section>
+      <section class="graph-section">
+        <h2 class="graph-section-heading">Graph</h2>
+        <div class="graph-content">${graphContent}</div>
+      </section>
+    </div>
+  `;
 }
 
 function generateVerticalBarChart(
   data: Array<{ label: string; value: number }>,
-  barChar: string = "█"
+  barChar: string = "█",
+  backgroundColor: string = "#1e293b",
+  textColor: string = "#4ade80"
 ): string {
   if (!barChar) {
-    return "Error: Bar character is required.";
+    return "<div class='graph-wrapper'><p>Error: Bar character is required.</p></div>";
   }
   const maxValue = Math.max(...data.map((d) => d.value));
   const maxLabelLength = Math.max(...data.map((d) => d.label.length), 20);
@@ -291,12 +236,8 @@ function generateVerticalBarChart(
   );
   const chartHeight = 15;
 
-  let output = "";
-
-  // Title
-  output += "Vertical Bar Chart\n";
-  const titleWidth = Math.max(chartWidth + maxLabelLength + 15, 60);
-  output += "=".repeat(titleWidth) + "\n\n";
+  let graphContent = "";
+  let legendContent = "";
 
   // Build the chart from top to bottom
   const chart: string[][] = Array(chartHeight)
@@ -330,16 +271,16 @@ function generateVerticalBarChart(
   for (let row = 0; row < chartHeight; row++) {
     const yValue = maxValue - (row / chartHeight) * maxValue;
     const yLabel = yValue.toFixed(0).padStart(yAxisWidth - 1);
-    output += `${yLabel}│`;
+    graphContent += `${yLabel}│`;
     for (let col = 0; col < chartWidth; col++) {
-      output += chart[row][col];
+      graphContent += chart[row][col];
     }
-    output += "\n";
+    graphContent += "\n";
   }
 
   // X-axis
-  output += " ".repeat(yAxisWidth) + "└";
-  output += "─".repeat(chartWidth) + "\n";
+  graphContent += " ".repeat(yAxisWidth) + "└";
+  graphContent += "─".repeat(chartWidth) + "\n";
 
   // X-axis labels (centered under each bar with proper spacing)
   // Build label line as an array, then convert to string
@@ -381,34 +322,44 @@ function generateVerticalBarChart(
       }
     }
   });
-  output += labelLine.join("") + "\n\n";
+  graphContent += labelLine.join("") + "\n";
 
-  // Values
+  // Legend
   data.forEach(({ label, value }) => {
-    output += `${label}: ${value}\n`;
+    legendContent += `<div class="legend-item"><span class="legend-label">${escapeHtml(label)}</span>: <span class="legend-value">${value}</span></div>`;
   });
 
-  return output;
+  return `
+    <div class="graph-wrapper" style="background-color: ${backgroundColor}; color: ${textColor};">
+      <h1 class="graph-heading">Vertical Bar Chart</h1>
+      <section class="legend-section">
+        <h2 class="legend-heading">Legend</h2>
+        <div class="legend-content">${legendContent}</div>
+      </section>
+      <section class="graph-section">
+        <h2 class="graph-section-heading">Graph</h2>
+        <div class="graph-content">${escapeHtml(graphContent)}</div>
+      </section>
+    </div>
+  `;
 }
 
 function generateAreaChart(
   data: Array<{ label: string; value: number }>,
-  areaChars: [string, string] = ["█", "▓"]
+  areaChars: [string, string] = ["█", "▓"],
+  backgroundColor: string = "#1e293b",
+  textColor: string = "#4ade80"
 ): string {
   if (!areaChars[0] || !areaChars[1]) {
-    return "Error: Both line and fill characters are required.";
+    return "<div class='graph-wrapper'><p>Error: Both line and fill characters are required.</p></div>";
   }
   const maxValue = Math.max(...data.map((d) => d.value));
   const maxLabelLength = Math.max(...data.map((d) => d.label.length), 20);
   const chartWidth = Math.max(data.length * 4, 40);
   const chartHeight = 15;
 
-  let output = "";
-
-  // Title
-  output += "Area Chart\n";
-  const titleWidth = Math.max(chartWidth + maxLabelLength + 15, 60);
-  output += "=".repeat(titleWidth) + "\n\n";
+  let graphContent = "";
+  let legendContent = "";
 
   // Build the chart from top to bottom
   const chart: string[][] = Array(chartHeight)
@@ -465,16 +416,16 @@ function generateAreaChart(
   for (let row = 0; row < chartHeight; row++) {
     const yValue = maxValue - (row / chartHeight) * maxValue;
     const yLabel = yValue.toFixed(0).padStart(yAxisWidth - 1);
-    output += `${yLabel}│`;
+    graphContent += `${yLabel}│`;
     for (let col = 0; col < chartWidth; col++) {
-      output += chart[row][col];
+      graphContent += chart[row][col];
     }
-    output += "\n";
+    graphContent += "\n";
   }
 
   // X-axis
-  output += " ".repeat(yAxisWidth) + "└";
-  output += "─".repeat(chartWidth) + "\n";
+  graphContent += " ".repeat(yAxisWidth) + "└";
+  graphContent += "─".repeat(chartWidth) + "\n";
 
   // X-axis labels (aligned with data points, avoiding overlaps)
   const labelLine: string[] = Array(yAxisWidth + 1 + chartWidth).fill(NBSP);
@@ -552,14 +503,26 @@ function generateAreaChart(
     placedLabels.push({ start: labelStart, end: labelStart + label.length });
   });
 
-  output += labelLine.join("") + "\n\n";
+  graphContent += labelLine.join("") + "\n";
 
-  // Values
+  // Legend
   data.forEach(({ label, value }) => {
-    output += `${label}: ${value}\n`;
+    legendContent += `<div class="legend-item"><span class="legend-label">${escapeHtml(label)}</span>: <span class="legend-value">${value}</span></div>`;
   });
 
-  return output;
+  return `
+    <div class="graph-wrapper" style="background-color: ${backgroundColor}; color: ${textColor};">
+      <h1 class="graph-heading">Area Chart</h1>
+      <section class="legend-section">
+        <h2 class="legend-heading">Legend</h2>
+        <div class="legend-content">${legendContent}</div>
+      </section>
+      <section class="graph-section">
+        <h2 class="graph-section-heading">Graph</h2>
+        <div class="graph-content">${escapeHtml(graphContent)}</div>
+      </section>
+    </div>
+  `;
 }
 
 function generatePieChart(
@@ -577,23 +540,22 @@ function generatePieChart(
     "□",
     "▪",
     "▫",
-  ]
+  ],
+  backgroundColor: string = "#1e293b",
+  textColor: string = "#4ade80"
 ): string {
   if (pieChars.length === 0) {
-    return "Error: At least one character is required for pie chart.";
+    return "<div class='graph-wrapper'><p>Error: At least one character is required for pie chart.</p></div>";
   }
   if (pieChars.length < data.length) {
-    return `Error: Please select at least ${data.length} character${data.length > 1 ? "s" : ""} for ${data.length} data point${data.length > 1 ? "s" : ""}. You have ${pieChars.length} selected.`;
+    return `<div class='graph-wrapper'><p>Error: Please select at least ${data.length} character${data.length > 1 ? "s" : ""} for ${data.length} data point${data.length > 1 ? "s" : ""}. You have ${pieChars.length} selected.</p></div>`;
   }
   const total = data.reduce((sum, d) => sum + d.value, 0);
   const maxLabelLength = Math.max(...data.map((d) => d.label.length), 20);
   const pieSize = 24;
 
-  let output = "";
-
-  // Title
-  output += "Pie Chart\n";
-  output += "=".repeat(60) + "\n\n";
+  let graphContent = "";
+  let legendContent = "";
 
   // Calculate percentages
   const percentages = data.map((d) => ({
@@ -605,21 +567,19 @@ function generatePieChart(
   // Use provided characters, or cycle through if more data points than characters
   const chars = pieChars.length > 0 ? pieChars : ["█"];
 
-  output += "Legend:\n";
+  // Legend
   percentages.forEach((item, index) => {
     const char = chars[index % chars.length];
     const padding = " ".repeat(maxLabelLength - item.label.length);
     const valueStr = Number.isInteger(item.value)
       ? item.value.toString()
       : item.value.toFixed(1);
-    output += `${char} ${item.label}${padding} ${valueStr} (${item.percentage.toFixed(1)}%)\n`;
+    legendContent += `<div class="legend-item"><span class="legend-char">${escapeHtml(char)}</span> <span class="legend-label">${escapeHtml(item.label)}</span>${padding} <span class="legend-value">${valueStr}</span> (<span class="legend-percentage">${item.percentage.toFixed(1)}%</span>)</div>`;
   });
-
-  output += "\nVisual Representation:\n\n";
 
   // Create a pie visualization
   // Account for monospace font aspect ratio (characters are taller than wide)
-  // Typical ratio is about 2:1 (height:width), so we use 2.0 as aspect ratio
+  // Adjust aspect ratio to make circle appear round (typically around 1.5-1.8 for monospace fonts)
   const aspectRatio = 2.0;
   const centerX = pieSize / 2 - 0.5;
   const centerY = pieSize / 2 - 0.5;
@@ -652,13 +612,25 @@ function generatePieChart(
           cumulativeAngle += sliceAngle;
         }
 
-        output += chars[charIndex % chars.length];
+        graphContent += chars[charIndex % chars.length];
       } else {
-        output += NBSP;
+        graphContent += NBSP;
       }
     }
-    output += "\n";
+    graphContent += "\n";
   }
 
-  return output;
+  return `
+    <div class="graph-wrapper" style="background-color: ${backgroundColor}; color: ${textColor};">
+      <h1 class="graph-heading">Pie Chart</h1>
+      <section class="legend-section">
+        <h2 class="legend-heading">Legend</h2>
+        <div class="legend-content">${legendContent}</div>
+      </section>
+      <section class="graph-section">
+        <h2 class="graph-section-heading">Graph</h2>
+        <div class="graph-content">${escapeHtml(graphContent)}</div>
+      </section>
+    </div>
+  `;
 }

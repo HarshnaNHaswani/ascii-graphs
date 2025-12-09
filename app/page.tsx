@@ -439,6 +439,16 @@ export default function Home() {
                 >
                   Blue Theme
                 </Button>
+                <Button
+                  onClick={() => {
+                    setBackgroundColor("white");
+                    setTextColor("black");
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Black-n-White
+                </Button>
               </div>
             </div>
 
