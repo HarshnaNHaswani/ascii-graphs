@@ -70,9 +70,18 @@ export function generateAreaChart(
 
   // Draw Y-axis labels and chart
   const yAxisWidth = 6;
+  let lastYLabel = -1;
   for (let row = 0; row < chartHeight; row++) {
     const yValue = maxValue - (row / chartHeight) * maxValue;
-    const yLabel = yValue.toFixed(0).padStart(yAxisWidth - 1);
+    const roundedYValue = Math.round(yValue);
+
+    // Only show label if the value changed or at specific intervals
+    let yLabel = " ".repeat(yAxisWidth - 1);
+    if (roundedYValue !== lastYLabel) {
+      yLabel = roundedYValue.toFixed(0).padStart(yAxisWidth - 1);
+      lastYLabel = roundedYValue;
+    }
+
     graphContent += `${yLabel}│`;
     for (let col = 0; col < chartWidth; col++) {
       graphContent += chart[row][col];

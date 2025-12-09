@@ -4,6 +4,16 @@ import { useState, useEffect } from "react";
 import { CSVInputProps } from "@/types/csv";
 import { parseCSV } from "@/lib/csv/parser";
 
+const TIPS = [
+  "Use monospace fonts for best results",
+  "If 'Copy All' doesn't work, manually copy and paste just the graph",
+  "Graphs can be pasted into Google Docs, Medium, Notion, and other platforms",
+  "Colors can be changed after pasting into your document",
+  "Background color is for reference against your document",
+  "Scale the graph size by adjusting the font size",
+  "Adjust vertical spacing by changing the line height",
+];
+
 export default function CSVInput({
   onDataProcessed,
   csvData,
@@ -107,6 +117,18 @@ export default function CSVInput({
       >
         Process CSV
       </button>
+
+      <div className="mt-6 pt-6 border-t border-slate-200">
+        <h3 className="text-sm font-semibold text-slate-700 mb-3">Tips:</h3>
+        <ol className="space-y-2 text-xs text-slate-600 font-mono">
+          {TIPS.map((tip, index) => (
+            <li key={index} className="flex gap-2">
+              <span className="text-slate-400">{index + 1}.</span>
+              <span>{tip}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 }

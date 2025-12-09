@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   title: "ASCII Graphs - CSV to Graph Converter",
   description:
     "Convert CSV data to ASCII bar graphs, area charts, and pie charts",
+  icons: {
+    icon: [
+      { url: "/icon3.svg", type: "image/svg+xml" },
+      { url: "/icon2.png", type: "image/png" },
+      { url: "/icon1.png", type: "image/jpeg" },
+    ],
+  },
 };
 
 export default function RootLayout({

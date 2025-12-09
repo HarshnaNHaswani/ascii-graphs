@@ -30,7 +30,7 @@ Elevato, 9
 Boom, 4
 Blast, 20
 Carps, 7`);
-  const [graphType, setGraphType] = useState<GraphType>("bar");
+  const [graphType, setGraphType] = useState<GraphType>("pie");
   const [parsedData, setParsedData] = useState<GraphDataPoint[]>([]);
 
   // Use React 19 best practices with useSyncExternalStore for localStorage
@@ -100,6 +100,13 @@ Carps, 7`);
               </Label>
               <div className="flex gap-2">
                 <Button
+                  onClick={() => setGraphType("pie")}
+                  variant={graphType === "pie" ? "default" : "outline"}
+                  size="sm"
+                >
+                  Pie Chart
+                </Button>
+                <Button
                   onClick={() => setGraphType("bar")}
                   variant={graphType === "bar" ? "default" : "outline"}
                   size="sm"
@@ -119,13 +126,6 @@ Carps, 7`);
                   size="sm"
                 >
                   Area Chart
-                </Button>
-                <Button
-                  onClick={() => setGraphType("pie")}
-                  variant={graphType === "pie" ? "default" : "outline"}
-                  size="sm"
-                >
-                  Pie Chart
                 </Button>
               </div>
             </div>
