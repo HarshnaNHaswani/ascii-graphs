@@ -1,8 +1,9 @@
-# ASCII Graphs
+# Beautiful graphs for your blog using ASCII
 
 ### CSV to Graph converter
 
-Convert CSV data to ASCII bar graphs, area charts, and pie charts. Since it uses normal characters similar to "A-Z" or "0-9", it can be used in any text boxes. Paste it to your Medium, Notion, Google Doc etc.
+Boost your blog engagement with visuals! Go from raw tables to a
+polished graph in a single click. ASCII Graphs is built for creators: zero learning curve, beautiful default designs, and fast exports so you can get back to writing great content.
 
 ### Preview
 

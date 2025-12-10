@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Script from "next/script";
-import Image from "next/image";
+import LogoImage from "@/components/LogoImage";
 
 export const metadata: Metadata = {
   title: "ASCII Graphs - CSV to Graph Converter",
@@ -9,9 +9,10 @@ export const metadata: Metadata = {
     "Convert CSV data to ASCII bar graphs, area charts, and pie charts",
   icons: {
     icon: [
-      { url: "/icon3.svg", type: "image/svg+xml" },
-      { url: "/icon2.png", type: "image/png" },
-      { url: "/icon1.png", type: "image/jpeg" },
+      // { url: "/icon3.svg", type: "image/svg+xml" },
+      // { url: "/icon2.png", type: "image/png" },
+      // { url: "/icon1.png", type: "image/jpeg" },
+      { url: "/icon4.png", type: "image/png" },
     ],
   },
 };
@@ -41,7 +42,7 @@ export default function RootLayout({
           }}
         />
         <header className="flex justify-between items-center p-4 gap-4 flex-wrap">
-          <Image src="/icon3.svg" alt="ASCII Graphs" width={100} height={100} />
+          <LogoImage />
           <section className="flex justify-end items-center gap-4">
             <a
               href="http://github.com/HarshnaNHaswani/ascii-graphs"

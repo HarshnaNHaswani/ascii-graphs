@@ -79,9 +79,14 @@ Carps, 7`);
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">ASCII Graphs</h1>
-        <p className="text-slate-600 mb-8">
-          Convert your CSV data into beautiful ASCII graphs
+        <h1 className="text-4xl font-bold text-slate-900 mb-2">
+          Beautiful graphs for your blog
+        </h1>
+        <p className="text-slate-600 mb-8 md:max-w-2xl">
+          Boost your blog engagement with visuals! Go from raw tables to a
+          polished graph in a single click. ASCII Graphs is built for creators:
+          zero learning curve, beautiful default designs, and fast exports so
+          you can get back to writing great content.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
