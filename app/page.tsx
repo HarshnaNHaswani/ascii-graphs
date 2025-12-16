@@ -77,20 +77,20 @@ Carps, 7`);
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-2">
           Beautiful graphs for your blog
         </h1>
-        <p className="text-slate-600 mb-8 md:max-w-2xl">
+        <p className="text-sm sm:text-base text-slate-600 mb-6 sm:mb-8 md:max-w-2xl">
           Boost your blog engagement with visuals! Go from raw tables to a
           polished graph in a single click. ASCII Graphs is built for creators:
           zero learning curve, beautiful default designs, and fast exports so
           you can get back to writing great content.
         </p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
             <CSVInput
               onDataProcessed={handleCSVProcess}
               csvData={csvData}
@@ -98,12 +98,12 @@ Carps, 7`);
             />
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 min-w-0">
             <div className="mb-4">
               <Label className="text-sm font-medium text-slate-700 mb-2 block">
                 Graph Type
               </Label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={() => setGraphType("pie")}
                   variant={graphType === "pie" ? "default" : "outline"}
@@ -343,7 +343,7 @@ Carps, 7`);
               <Label className="text-sm font-medium text-slate-700 mb-2 block">
                 Colors
               </Label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-xs text-slate-600 mb-1 block">
                     Background
@@ -385,7 +385,7 @@ Carps, 7`);
                   </div>
                 </div>
               </div>
-              <div className="mt-2 flex gap-2">
+              <div className="mt-2 flex gap-2 flex-wrap">
                 <Button
                   onClick={() => {
                     setBackgroundColor("#1e293b");

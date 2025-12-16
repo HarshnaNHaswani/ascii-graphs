@@ -128,6 +128,8 @@
 /* Graph HTML Structure Styles */
 .graph-wrapper {
   border-radius: 0.5rem;
+  min-width: 0;
+  overflow: visible;
 }
 
 .graph-heading {
@@ -137,8 +139,21 @@
   color: inherit;
 }
 
+@media (max-width: 640px) {
+  .graph-heading {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+}
+
 .legend-section {
   margin-bottom: 2rem;
+}
+
+@media (max-width: 640px) {
+  .legend-section {
+    margin-bottom: 1.5rem;
+  }
 }
 
 .legend-heading {
@@ -146,6 +161,13 @@
   font-weight: 600;
   margin-bottom: 0.75rem;
   color: inherit;
+}
+
+@media (max-width: 640px) {
+  .legend-heading {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
 }
 
 .legend-content {
@@ -189,6 +211,13 @@
   color: inherit;
 }
 
+@media (max-width: 640px) {
+  .graph-section-heading {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
 .graph-content {
   font-family: monospace;
   font-size: 0.875rem;
@@ -198,6 +227,15 @@
   padding: 0;
   line-height: 1.2;
   color: inherit;
+  overflow-x: auto;
+  display: block;
+  min-width: min-content;
+}
+
+@media (max-width: 640px) {
+  .graph-content {
+    font-size: 0.75rem;
+  }
 }
 
 .graph-row {

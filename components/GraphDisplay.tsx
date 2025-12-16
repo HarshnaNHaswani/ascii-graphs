@@ -117,13 +117,15 @@ export default function GraphDisplay({
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold text-slate-900">Graph Display</h2>
+    <div className="min-w-0">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+        <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">
+          Graph Display
+        </h2>
         <div className="flex gap-2">
           <button
             onClick={handleCopy}
-            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+            className={`px-3 sm:px-4 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
               copied
                 ? "bg-green-600 text-white"
                 : "bg-slate-200 text-slate-700 hover:bg-slate-300"
@@ -135,14 +137,14 @@ export default function GraphDisplay({
       </div>
 
       <div
-        className="p-6 rounded-md overflow-x-auto"
+        className="p-3 sm:p-6 rounded-md overflow-x-auto -mx-2 sm:mx-0"
         style={{
           backgroundColor: backgroundColor,
           color: textColor,
         }}
       >
         <div
-          className="font-mono text-sm"
+          className="font-mono text-xs sm:text-sm min-w-max"
           dangerouslySetInnerHTML={{ __html: graphOutput }}
         />
       </div>
